@@ -55,13 +55,35 @@ pipeline {
             }
         }
 
-        stage('Deploy-PROD') {
-            steps {
-                sh '''
-                ssh azureuser@70.153.148.55 "hostname"
-                '''
-            }
-        }
+       stage('Deploy-PROD') {
+    steps {
+        sh '''
+        ssh azureuser@70.153.148.55 "
+
+        cd ~
+
+        if [ ! -d Server-Health-Monitoring-Portal ]; then
+            git clone https://github.com/Sampath2720/Server-Health-Monitoring-Portal.git
+        fi
+
+        cd Server-Health-Monitoring-Portal
+
+        git pull
+
+        docker stop server-health || true
+        docker rm server-health || true
+
+        docker build -t server-health:v1 .
+
+        docker run -d \
+          --name server-health \
+          -p 7010:7010 \
+          server-health:v1
+
+        "
+        '''
+    }
+}
 
     }
 }
