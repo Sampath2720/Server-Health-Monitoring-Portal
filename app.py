@@ -9,7 +9,7 @@ def dashboard():
 
     try:
         vmsam = requests.get(
-            "http://localhost:5009/metrics",
+            "http://70.153.145.79:5009/metrics",
             timeout=5
         ).json()
     except Exception:
