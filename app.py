@@ -1,0 +1,103 @@
+from flask import Flask
+import socket
+import subprocess
+
+app = Flask(__name__)
+
+
+def get_local_health():
+    hostname = socket.gethostname()
+
+    cpu = subprocess.getoutput(
+        "top -bn1 | grep 'Cpu(s)' | awk '{print $2}' | cut -d. -f1"
+    )
+
+    memory = subprocess.getoutput(
+        "free | awk '/Mem:/ {printf(\"%.0f\", $3/$2 * 100)}'"
+    )
+
+    disk = subprocess.getoutput(
+        "df / | awk 'NR==2 {print $5}' | tr -d '%'"
+    )
+
+    uptime = subprocess.getoutput(
+        "uptime -p"
+    )
+
+    return {
+        "hostname": hostname,
+        "cpu": cpu,
+        "memory": memory,
+        "disk": disk,
+        "uptime": uptime
+    }
+
+
+@app.route("/")
+def dashboard():
+    server = get_local_health()
+
+    return f"""
+    <html>
+    <head>
+        <title>Server Health Monitoring Portal</title>
+        <style>
+            body {{
+                font-family: Arial;
+                margin: 40px;
+                background-color: #f4f6f9;
+            }}
+
+            table {{
+                border-collapse: collapse;
+                width: 80%;
+                background: white;
+            }}
+
+            th, td {{
+                border: 1px solid #ddd;
+                padding: 12px;
+                text-align: center;
+            }}
+
+            th {{
+                background: #0078d4;
+                color: white;
+            }}
+
+            h1 {{
+                color: #0078d4;
+            }}
+        </style>
+    </head>
+
+    <body>
+
+        <h1>🖥 Server Health Monitoring Portal</h1>
+
+        <table>
+            <tr>
+                <th>Hostname</th>
+                <th>CPU %</th>
+                <th>Memory %</th>
+                <th>Disk %</th>
+                <th>Uptime</th>
+            </tr>
+
+            <tr>
+                <td>{server['hostname']}</td>
+                <td>{server['cpu']}</td>
+                <td>{server['memory']}</td>
+                <td>{server['disk']}</td>
+                <td>{server['uptime']}</td>
+            </tr>
+
+        </table>
+
+    </body>
+    </html>
+    """
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=7010)
