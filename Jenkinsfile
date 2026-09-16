@@ -9,6 +9,16 @@ pipeline {
             }
         }
 
+        stage('Pytest') {
+        steps {
+        sh '''
+        python3 -m venv venv
+        . venv/bin/activate
+        pip install -r requirements.txt
+        pytest -v
+        '''
+    }
+}
         stage('Build') {
             steps {
                 sh 'docker build -t server-health:v1 .'
