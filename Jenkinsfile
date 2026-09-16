@@ -49,5 +49,19 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                input 'Deploy to PROD (VMAPP01)?'
+            }
+        }
+
+        stage('Deploy-PROD') {
+            steps {
+                sh '''
+                ssh azureuser@70.153.148.55 "hostname"
+                '''
+            }
+        }
+
     }
 }
